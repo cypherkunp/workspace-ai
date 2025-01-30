@@ -9,7 +9,6 @@
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
     "build": "remix vite:build",
-    "build:prod": "npm install -g pnpm && pnpm i && pnpm build",
     "dev": "node pre-start.cjs  && remix vite:dev",
     "test": "vitest --run",
     "test:watch": "vitest",
@@ -24,7 +23,7 @@
     "dockerbuild": "docker build -t bolt-ai:development -t bolt-ai:latest --target bolt-ai-development .",
     "typecheck": "tsc",
     "typegen": "wrangler types",
-    "preview": "pnpm run build && pnpm run start",
+    "preview": "npm run build && npm run start",
     "prepare": "husky"
   },
   "engines": {
@@ -138,6 +137,5 @@
   },
   "resolutions": {
     "@typescript-eslint/utils": "^8.0.0-alpha.30"
-  },
-  "packageManager": "pnpm@9.4.0"
+  }
 }
