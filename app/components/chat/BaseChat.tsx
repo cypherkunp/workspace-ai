@@ -27,6 +27,7 @@ import ChatAlert from './ChatAlert';
 import FilePreview from './FilePreview';
 import ProgressCompilation from './ProgressCompilation';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
+import { APIKeyManager, getApiKeysFromCookies } from './APIKeyManager';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -95,6 +96,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   ) => {
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [isModelSettingsCollapsed, setIsModelSettingsCollapsed] = useState(false);
+    const [apiKeys, setApiKeys] = useState<Record<string, string>>(getApiKeysFromCookies());
     const [isListening, setIsListening] = useState(false);
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
@@ -141,8 +143,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
         setRecognition(recognition);
 
-        const newApiKeys = { [DEFAULT_PROVIDER.name]: '' };
-        Cookies.set('apiKeys', JSON.stringify(newApiKeys));
+        let parsedApiKeys: Record<string, string> | undefined = {};
+
+        try {
+          parsedApiKeys = getApiKeysFromCookies();
+          setApiKeys(parsedApiKeys);
+        } catch (error) {
+          console.error('Error loading API keys from cookies:', error);
+        }
       }
     }, []);
 
@@ -158,6 +166,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         recognition.stop();
         setIsListening(false);
       }
+    };
+
+    const onApiKeysChange = async (providerName: string, apiKey: string) => {
+      const newApiKeys = { [providerName]: apiKey };
+      setApiKeys(newApiKeys);
+      Cookies.set('apiKeys', JSON.stringify(newApiKeys));
     };
 
     const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
@@ -260,7 +274,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 }}
               </ClientOnly>
               <div
-                className={classNames('flex flex-col gap-4 w-full max-w-chat mx-auto z-prompt mb-6', {
+                className={classNames('flex flex-col gap-4 w-full max-w-chat mx-auto z-prompt mb-2', {
                   'sticky bottom-2': chatStarted,
                 })}
               >
@@ -314,6 +328,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     <rect className={classNames(styles.PromptEffectLine)} pathLength="100" strokeLinecap="round"></rect>
                     <rect className={classNames(styles.PromptShine)} x="48" y="24" width="70" height="1"></rect>
                   </svg>
+
                   <FilePreview
                     files={uploadedFiles}
                     imageDataList={imageDataList}
@@ -477,6 +492,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         </div>
                       ) : null}
                     </div>
+                  </div>
+                  <div>
+                    <ClientOnly>
+                      {() => (
+                        <APIKeyManager
+                          provider={DEFAULT_PROVIDER}
+                          apiKey={apiKeys[DEFAULT_PROVIDER.name] || ''}
+                          setApiKey={(key) => {
+                            onApiKeysChange(DEFAULT_PROVIDER.name, key);
+                          }}
+                        />
+                      )}
+                    </ClientOnly>
                   </div>
                 </div>
               </div>

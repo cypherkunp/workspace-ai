@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
-import type { ProviderInfo } from '~/types/model';
 import Cookies from 'js-cookie';
+import React, { useCallback, useEffect, useState } from 'react';
+import { IconButton } from '~/components/ui/IconButton';
+import type { BaseProvider } from '~/lib/modules/llm/base-provider';
 
 interface APIKeyManagerProps {
-  provider: ProviderInfo;
+  provider: BaseProvider;
   apiKey: string;
   setApiKey: (key: string) => void;
   getApiKeyLink?: string;
@@ -86,10 +86,10 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
   };
 
   return (
-    <div className="flex items-center justify-between py-3 px-1">
+    <div className="flex items-center justify-between pt-2 px-1">
       <div className="flex items-center gap-2 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-bolt-elements-textSecondary">{provider?.name} API Key:</span>
+          <span className="text-sm font-medium text-bolt-elements-textSecondary"></span>
           {!isEditing && (
             <div className="flex items-center gap-2">
               {apiKey ? (
@@ -119,10 +119,10 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
             <input
               type="password"
               value={tempKey}
-              placeholder="Enter API Key"
+              placeholder={`Enter ${provider.name} API Key`}
               onChange={(e) => setTempKey(e.target.value)}
-              className="w-[300px] px-3 py-1.5 text-sm rounded border border-bolt-elements-borderColor 
-                        bg-bolt-elements-prompt-background text-bolt-elements-textPrimary 
+              className="w-[300px] px-3 py-1.5 text-sm rounded border border-bolt-elements-borderColor
+                        bg-bolt-elements-prompt-background text-bolt-elements-textPrimary
                         focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus"
             />
             <IconButton
@@ -151,16 +151,6 @@ export const APIKeyManager: React.FC<APIKeyManagerProps> = ({ provider, apiKey, 
                 <div className="i-ph:pencil-simple w-4 h-4" />
               </IconButton>
             }
-            {provider?.getApiKeyLink && !apiKey && (
-              <IconButton
-                onClick={() => window.open(provider?.getApiKeyLink)}
-                title="Get API Key"
-                className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 flex items-center gap-2"
-              >
-                <span className="text-xs whitespace-nowrap">{provider?.labelForGetApiKey || 'Get API Key'}</span>
-                <div className={`${provider?.icon || 'i-ph:key'} w-4 h-4`} />
-              </IconButton>
-            )}
           </>
         )}
       </div>
