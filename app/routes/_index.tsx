@@ -4,7 +4,7 @@ import { Chat } from '~/components/chat/Chat.client';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Bolt' }, { name: 'description', content: 'Talk with Bolt, an AI assistant from StackBlitz' }];
+  return [{ title: 'Slingshot AI' }, { name: 'description', content: 'Talk with an AI assistant' }];
 };
 
 export const loader = () => json({});
