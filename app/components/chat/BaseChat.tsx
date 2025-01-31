@@ -23,13 +23,34 @@ import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
 import type { ActionAlert } from '~/types/actions';
 import type { ProgressAnnotation } from '~/types/context';
 import type { ProviderInfo } from '~/types/model';
+import { APIKeyManager, getApiKeysFromCookies } from './APIKeyManager';
 import ChatAlert from './ChatAlert';
 import FilePreview from './FilePreview';
 import ProgressCompilation from './ProgressCompilation';
 import { ScreenshotStateManager } from './ScreenshotStateManager';
-import { APIKeyManager, getApiKeysFromCookies } from './APIKeyManager';
 
 const TEXTAREA_MIN_HEIGHT = 76;
+const DEFAULT_PROMPT = `
+Create a modern, responsive one-page website for a credit card product that includes the following sections:
+
+Hero Section – A compelling introduction highlighting the card’s key benefits, with a strong call-to-action.
+Features & Benefits – Detailed information on the rewards program, interest rates, and exclusive card perks.
+Application Form – A streamlined, user-friendly form for card applications.
+FAQ & Support – Answers to common questions and customer service contact options.
+Terms & Conditions – A section with the card agreement and legal information.
+
+Requirements:
+Give 100px margin top and bottom between sections.
+Mobile-first, responsive design for seamless performance across devices.
+Intuitive navigation for easy access to different sections.
+Consistent branding with a professional and trustworthy visual style.
+Security & trust indicators, such as encryption badges and compliance disclaimers.
+Interactive elements, including a rewards calculator and card benefit comparisons.
+Strong CTAs guiding users toward applying for the card.
+Integration-ready forms for capturing leads and applications.
+Compliance with financial regulations to ensure industry standards are met.
+The design should emphasize security, professionalism, and user trust while maintaining an engaging and modern aesthetic.
+`;
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
@@ -101,6 +122,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
     const [transcript, setTranscript] = useState('');
     const [progressAnnotations, setProgressAnnotations] = useState<ProgressAnnotation[]>([]);
+
     useEffect(() => {
       if (data) {
         const progressList = data.filter(
@@ -115,6 +137,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     useEffect(() => {
       if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+        if (textareaRef?.current) {
+          textareaRef.current.value = DEFAULT_PROMPT;
+          handleSendMessage({} as React.UIEvent, textareaRef?.current.value);
+        }
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
